@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: "${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}" 
+          image: docker.io/leoworths/frontend:v1.0.4
           ports:
             - containerPort: 80
 ---

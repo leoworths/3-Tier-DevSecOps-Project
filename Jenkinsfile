@@ -9,7 +9,7 @@ pipeline {
         BACKEND_DIR = 'api'
         DOCKER_REGISTRY = 'docker.io/leoworths'
         IMAGE_TAG = "v1.0.${env.BUILD_NUMBER}"
-        PROJECT_NAME = '3-Tier-Devsecops-Project'
+        PROJECT_NAME = '3-Tier-DevSecOps-Project'
         ENVIRONMENT = 'Production'
     }
     stages {
@@ -42,7 +42,6 @@ pipeline {
                             steps {
                                 dir("${FRONTEND_DIR}") {
                                     sh 'npm install'
-                                    sh 'npm run build'
                                     sh 'npm test'
                                 }
                             }
@@ -51,7 +50,6 @@ pipeline {
                             steps {
                                 dir("${BACKEND_DIR}") {
                                     sh 'npm install'
-                                    sh 'npm run build'
                                     sh 'npm test'
                                 }
                             }
@@ -126,8 +124,8 @@ pipeline {
                     def backendImage = "${DOCKER_REGISTRY}/backend:${IMAGE_TAG}"
                     def frontendImage = "${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}"
                     withCredentials([usernamePassword(credentialsId: 'git-cred', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                        sh "git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/leoworths/3-Tier-Devsecops-Project.git"
-                        dir('3-Tier-Devsecops-Project') {
+                        sh "git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/leoworths/3-Tier-DevSecOps-Project.git"
+                        dir('3-Tier-DevSecOps-Project') {
                             sh "sed -i 's|image: .*|image: ${backendImage}|' k8s-prod/backend.yaml"
                             sh "sed -i 's|image: .*|image: ${frontendImage}|' k8s-prod/frontend.yaml"
                             sh "git config --global user.email 'leoworth@gmail.com'"

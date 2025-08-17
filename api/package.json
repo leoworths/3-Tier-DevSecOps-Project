@@ -4,7 +4,8 @@
   "description": "Node.js REST API for user CRUD",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "echo \"No test specified\" && exit 1"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

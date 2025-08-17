@@ -16,6 +16,7 @@ kubectl create serviceaccount vault-auth -n prod
 kubectl create secret generic aws-creds \
   --from-literal=AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
   --from-literal=AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  --from-literal=AWS_KMS_KEY_ID=$AWS_KMS_KEY_ID 
   --namespace vault
 
 

@@ -45,6 +45,9 @@ server:
     - envName: AWS_SECRET_ACCESS_KEY
       secretName: aws-creds
       secretKey: AWS_SECRET_ACCESS_KEY
+    - envName: AWS_KMS_KEY_ID
+      secretName: aws-creds
+      secretKey: AWS_KMS_KEY_ID
 
   readinessProbe:
     enabled: true
@@ -111,7 +114,7 @@ server:
 
         seal "awskms" {
           region = "us-east-1"
-          kms_key_id = "c98495f1-a925-4132-ae5e-a45b2d63ce92"
+          kms_key_id = "${AWS_KMS_KEY_ID}"
         }
         disable_mlock = true
         service_registration "kubernetes" {}

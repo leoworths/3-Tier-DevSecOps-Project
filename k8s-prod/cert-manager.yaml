@@ -10,9 +10,12 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    - http01:
-        ingress:
-          class: nginx
+    - dns01:
+        cloudflare:
+          email: leoworths@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-api-token
+            key: apiToken
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

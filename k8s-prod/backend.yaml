@@ -29,6 +29,8 @@ spec:
           {{- with secret "secret/data/backend" -}}
           export JWT_SECRET="{{ .Data.data.JWT_SECRET }}"
           {{- end }}
+        vault.hashicorp.com/agent-inject-configMap: "vault-ca-cert"
+        vault.hashicorp.com/agent-inject-mount: "vault/ca"
     spec:
       serviceAccountName: vault-auth
       containers:
@@ -59,6 +61,14 @@ spec:
                 configMapKeyRef:
                   name: backend-config
                   key: RESET_ADMIN_PASS
+          volumeMounts:
+            - name: vault-ca
+              mountPath: /vault/ca
+              readOnly: true
+      volumes:
+        - name: vault-ca
+          configMap:
+            name: vault-ca-cert        
 ---
 apiVersion: v1
 kind: Service

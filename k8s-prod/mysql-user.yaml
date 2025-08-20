@@ -17,6 +17,8 @@ spec:
           export DB_USER="{{ .Data.data.MYSQL_USER }}"
           export DB_PASSWORD="{{ .Data.data.MYSQL_PASSWORD }}"
           {{- end }}
+        vault.hashicorp.com/agent-inject-configMap: "vault-ca-cert"
+        vault.hashicorp.com/agent-inject-mount: "vault/ca"  
     spec:
       restartPolicy: OnFailure
       serviceAccountName: vault-auth
@@ -37,3 +39,11 @@ spec:
                 CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
                 GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'%' WITH GRANT OPTION;
                 FLUSH PRIVILEGES;"
+          volumeMounts:
+            - name: vault-ca
+              mountPath: /vault/ca
+              readOnly: true
+      volumes:
+        - name: vault-ca
+          configMap:
+            name: vault-ca-cert      

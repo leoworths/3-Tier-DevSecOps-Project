@@ -32,8 +32,13 @@ spec:
               echo "Waiting for Vault secrets..."
               while [ ! -f /vault/secrets/db-cred ]; do sleep 1; done
               source /vault/secrets/db-cred
-              echo "Waiting for MySQL secrets..."
-              until mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e 'exit'; do sleep 1; done
+            
+              echo "Waiting for MySQL to be ready..."
+              until mysqladmin ping -h mysql-svc --silent; do
+                echo "MySQL unavailable - sleeping"
+                sleep 5
+              done
+              
               echo "Creating database user..."
               mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e "
                 CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';

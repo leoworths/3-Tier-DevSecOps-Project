@@ -89,6 +89,6 @@ metadata:
   name: backend-config
   namespace: prod
 data:
-  DB_HOST: mysql
+  DB_HOST: mysql-svc
   DB_NAME: crud_app
   RESET_ADMIN_PASS: 'true'

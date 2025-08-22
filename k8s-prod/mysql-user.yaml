@@ -33,9 +33,9 @@ spec:
               while [ ! -f /vault/secrets/db-cred ]; do sleep 1; done
               source /vault/secrets/db-cred
               echo "Waiting for MySQL secrets..."
-              until mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e 'exit'; do sleep 1; done
+              until mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e 'exit'; do sleep 1; done
               echo "Creating database user..."
-              mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "
+              mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e "
                 CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
                 GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'%' WITH GRANT OPTION;
                 FLUSH PRIVILEGES;"

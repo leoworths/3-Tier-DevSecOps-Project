@@ -8,7 +8,6 @@ spec:
   template:
     metadata:
       annotations:
-        vault.hashicorp.com/role: "vault-role"
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/agent-inject-secret-db-cred: "secret/data/mysql"
         vault.hashicorp.com/agent-inject-template-db-cred: |
@@ -17,15 +16,15 @@ spec:
           export DB_USER="{{ .Data.data.MYSQL_USER }}"
           export DB_PASSWORD="{{ .Data.data.MYSQL_PASSWORD }}"
           {{- end }}
+        vault.hashicorp.com/agent-inject-mount: "vault/secrets"
         vault.hashicorp.com/agent-inject-configMap: "vault-ca-cert"
-        vault.hashicorp.com/agent-inject-mount: "vault/ca"
+        vault.hashicorp.com/role: "vault-role"
     spec:
-      restartPolicy: OnFailure
       serviceAccountName: vault-auth
+      restartPolicy: Never
       containers:
         - name: mysql-user
           image: mysql:8.0
-          imagePullPolicy: Always
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -40,10 +39,14 @@ spec:
                 GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'%' WITH GRANT OPTION;
                 FLUSH PRIVILEGES;"
           volumeMounts:
+            - name: vault-secrets
+              mountPath: /vault/secrets
             - name: vault-ca
               mountPath: /vault/ca
-              readOnly: true
       volumes:
         - name: vault-ca
           configMap:
             name: vault-ca-cert
+        - name: vault-secrets
+          emptyDir: {}
+

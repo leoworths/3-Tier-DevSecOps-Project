@@ -58,13 +58,13 @@ spec:
               exec docker-entrypoint.sh mysqld
           readinessProbe:
             exec:
-              command: ["mysqladmin", "ping", "-h", "-p$MYSQL_ROOT_PASSWORD"]
+              command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5 
           livenessProbe:
             exec:
-              command: ["mysqladmin", "ping", "-h", "-p$MYSQL_ROOT_PASSWORD"]
+              command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5    

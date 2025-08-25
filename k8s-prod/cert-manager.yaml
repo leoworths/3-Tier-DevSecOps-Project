@@ -16,17 +16,4 @@ spec:
           apiTokenSecretRef:
             name: cloudflare-api-token
             key: apiToken
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: prod-certificate
-  namespace: prod
-spec:
-  secretName: prod-tls
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
-  dnsNames:
-  - worths.cloud
-  - www.worths.cloud
+

@@ -35,15 +35,21 @@ spec:
       serviceAccountName: vault-auth
       containers:
         - name: backend
-          image: docker.io/leoworths/backend:v1.0.4
+          image: "${DOCKER_REGISTRY}/backend:${IMAGE_TAG}"
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
           command: ["/bin/sh", "-c"]
           args:
             - |
+              echo "Waiting for Vault secrets..."
+              while [ ! -f /vault/secrets/db-cred ] || [ ! -f /vault/secrets/app-secret ]; do sleep 1; done
+              echo "Vault secrets ready!"
               source /vault/secrets/db-cred
               source /vault/secrets/app-secret
+              echo "Waiting for DB..."
+              until mysqladmin ping -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" --silent; do sleep 1; done
+              echo "Starting backend..."
               exec node app.js
           env:
             - name: DB_HOST
@@ -65,10 +71,17 @@ spec:
             - name: vault-ca
               mountPath: /vault/ca
               readOnly: true
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
       volumes:
         - name: vault-ca
           configMap:
-            name: vault-ca-cert        
+            name: vault-ca-cert
 ---
 apiVersion: v1
 kind: Service

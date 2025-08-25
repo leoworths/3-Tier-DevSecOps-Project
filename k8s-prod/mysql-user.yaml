@@ -1,3 +1,4 @@
+#create db user and privileges
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -31,15 +32,13 @@ spec:
               echo "Waiting for Vault secrets..."
               while [ ! -f /vault/secrets/db-cred ]; do sleep 1; done
               source /vault/secrets/db-cred
-              echo "Waiting for MySQL to be ready..."
-              until mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e 'SELECT 1;' >/dev/null 2>&1; do sleep 1; done
+              echo "Waiting for MySQL secrets..."
+              until mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e 'exit'; do sleep 1; done
               echo "Creating database user..."
-              mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" <<EOF
-CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
-GRANT ALL PRIVILEGES ON crud_app.* TO '$DB_USER'@'%' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-EOF
-              echo "User created successfully!"
+              mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e "
+                CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
+                GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'%' WITH GRANT OPTION;
+                FLUSH PRIVILEGES;"
           volumeMounts:
             - name: vault-ca
               mountPath: /vault/ca

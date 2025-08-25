@@ -1,4 +1,3 @@
-#create db user and privileges
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -9,6 +8,8 @@ spec:
     metadata:
       annotations:
         vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-pre-populate-only: "true"  # <-- Proper annotation for Jobs
+        vault.hashicorp.com/role: "vault-role"
         vault.hashicorp.com/agent-inject-secret-db-cred: "secret/data/mysql"
         vault.hashicorp.com/agent-inject-template-db-cred: |
           {{- with secret "secret/data/mysql" -}}
@@ -16,9 +17,8 @@ spec:
           export DB_USER="{{ .Data.data.MYSQL_USER }}"
           export DB_PASSWORD="{{ .Data.data.MYSQL_PASSWORD }}"
           {{- end }}
-        vault.hashicorp.com/agent-inject-mount: "vault/secrets"
+        vault.hashicorp.com/agent-inject-mount: "/vault/ca"
         vault.hashicorp.com/agent-inject-configMap: "vault-ca-cert"
-        vault.hashicorp.com/role: "vault-role"
     spec:
       serviceAccountName: vault-auth
       restartPolicy: Never
@@ -31,22 +31,26 @@ spec:
               echo "Waiting for Vault secrets..."
               while [ ! -f /vault/secrets/db-cred ]; do sleep 1; done
               source /vault/secrets/db-cred
-              echo "Waiting for MySQL secrets..."
-              until mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e 'exit'; do sleep 1; done
+              echo "Waiting for MySQL..."
+              until mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e 'exit'; do
+                sleep 1
+              done
               echo "Creating database user..."
               mysql -h mysql-svc -u root -p"$MYSQL_ROOT_PASSWORD" -e "
                 CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
-                GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'%' WITH GRANT OPTION;
+                GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'%';
                 FLUSH PRIVILEGES;"
+              echo "Done."
           volumeMounts:
             - name: vault-secrets
               mountPath: /vault/secrets
             - name: vault-ca
               mountPath: /vault/ca
       volumes:
+        - name: vault-secrets
+          emptyDir: {}
         - name: vault-ca
           configMap:
             name: vault-ca-cert
-        - name: vault-secrets
-          emptyDir: {}
+
 
